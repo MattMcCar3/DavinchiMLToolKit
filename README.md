@@ -2,8 +2,8 @@
 
 Two things live in this repo:
 
-1. **`davinchi.ml`** — a from-scratch k-NN toolkit (normalization, 5x2 cross-validation, mixed-type distance metrics, k-NN classification/regression, condensed k-NN), originally built for JHU 605.649 coursework. See `REPORT.md` for the full writeup, including a bug that was found and fixed in the condensed k-NN implementation.
-2. **`davinchi.video`** + **`davinchi.resolve`** — a footage-processing pipeline for the "Written in Paint" content channel: detects hard cuts and dead air, classifies painting stages from frame color, unifies all three into one timeline, and pushes that timeline into DaVinci Resolve as markers via its Python scripting API.
+1. **`davinchi.ml`** — a from-scratch k-NN toolkit (normalization, 5x2 cross-validation, mixed-type distance metrics, k-NN classification/regression, condensed k-NN). See `REPORT.md` for the full writeup, including a bug that was found and fixed in the condensed k-NN implementation.
+2. **`davinchi.video`** + **`davinchi.resolve`** — a footage-processing pipeline for the "PLACEHOLDER" content channel: detects hard cuts and dead air, classifies painting stages from frame color, unifies all three into one timeline, and pushes that timeline into DaVinci Resolve as markers via its Python scripting API.
 
 The `ml` package isn't just kept around for sentiment — the stage classifier in `video/classification/stage_classifier.py` directly reuses `davinchi.ml.models.knn`.
 

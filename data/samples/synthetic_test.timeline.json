@@ -1,0 +1,18 @@
+{
+  "duration_sec": 30.0,
+  "cuts": [
+    10.0,
+    20.0
+  ],
+  "silence_spans": [
+    {
+      "start": 4.25,
+      "end": 8.0
+    },
+    {
+      "start": 16.25,
+      "end": 19.0
+    }
+  ],
+  "stage_labels": []
+}

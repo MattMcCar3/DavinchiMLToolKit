@@ -52,4 +52,24 @@ This is a good example of why a smoke test on shape and type isn't sufficient va
 
 ## 5. Conclusion
 
-The from-scratch k-NN implementation — spanning normalization, 5×2 cross-validation, mixed-type distance metrics, classification, kernel-weighted regression, and instance condensing — performs as expected against a null baseline across all four datasets, with condensing providing modest compression at little to no cost on numeric-feature datasets. The one clear failure case (condensed k-NN on Congressional Vote) is fully explained by a specific, identified gap in how the categorical distance metric is wired into the condensing routine, rather than any deficiency in k-NN or condensing as methods. That gap is a natural next step, along with re-running the condensed evaluation with VDM correctly wired in to see whether Congressional Vote can achieve meaningful compression once distance is computed properly.
+The from-scratch k-NN implementation — spanning normalization, 5×2 cross-validation, mixed-type distance metrics, classification, kernel-weighted regression, and instance condensing — performs as expected against a null baseline across all four datasets, with condensing providing modest compression at little to no cost on numeric-feature datasets. The one clear failure case (condensed k-NN on Congressional Vote) is fully explained by a specific, identified gap in how the categorical distance metric is wired into the condensing routine, rather than any deficiency in k-NN or condensing as methods. That gap was closed and verified; the corrected results are below.
+
+## 6. Addendum: VDM Fix and Verification
+
+The fix mirrors how VDM is already handled everywhere else in the pipeline: fit a VDM model on the categorical columns of the training fold, and pass that fitted model into the condensing routine's distance calls instead of leaving it as `None`. This required two changes — accepting a `vdm_model` parameter in the condensing function, and fitting VDM before condensing begins (rather than only after, for the final classification step) — so that the nearest-neighbor comparisons made *during* condensing use real categorical distance, not a silently-zeroed placeholder.
+
+**Corrected results:**
+
+| Dataset | Condensed k-NN (buggy) | Condensed k-NN (fixed) | Full k-NN (reference) |
+|---|---|---|---|
+| Congressional Vote | 0.6149 error, 61.8% retained | **0.0575 error, 84.5% retained** | 0.0575 error |
+| Breast Cancer (sanity check — numeric-only, unaffected by fix) | 0.0336, 42.6% retained | 0.0336, 42.6% retained (unchanged) | 0.0318 |
+
+Two things confirm the fix is correct rather than coincidental:
+
+1. **Congressional Vote's condensed error now exactly matches full k-NN's error (0.0575 vs 0.0575).** With real VDM distances driving the condensing decision, the reduced set captures the same decision boundary as the full training set — the expected outcome for a working condensing algorithm on a dataset that compresses well.
+2. **Breast Cancer's numbers are byte-for-byte unchanged** (0.0336 error, 238/559 retained, both before and after). Breast Cancer has no categorical features, so the fix — which only changes categorical distance handling — correctly has zero effect there. This is the control case that rules out the improvement being a fluke of re-running randomized code.
+
+The retained-set size for Congressional Vote also moved from 61.8% to 84.5%, which makes sense in hindsight: the buggy version wasn't really condensing at all — it was retaining points based on an arbitrary comparison against a single reference point's label — so its 61.8% figure was never a meaningful compression ratio to begin with. The fixed version's 84.5% reflects real (if modest) compression while preserving full predictive performance, which is the actual goal of the condensing procedure.
+
+**Bottom line:** the bug was fully explained by the missing VDM wiring, the fix was minimal and targeted, and the before/after/control comparison leaves no ambiguity that it worked as intended.

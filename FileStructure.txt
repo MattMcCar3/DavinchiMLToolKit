@@ -1,0 +1,44 @@
+DavinchiMLToolKit/
+├── pyproject.toml
+├── README.md
+├── REPORT.md                       # the k-NN closure report — stays as historical record
+├── src/
+│   └── davinchi/
+│       ├── ml/                     # generalized version of what you already built & fixed
+│       │   ├── preprocessing/      # normalize.py, splits.py
+│       │   ├── distance/           # minkowski.py, vdm.py, combined.py
+│       │   ├── models/             # knn.py, condensed_knn.py, null_models.py
+│       │   ├── evaluation/         # metrics.py, cv.py
+│       │   └── tuning/
+│       │
+│       ├── video/                  # new: footage-specific pipeline
+│       │   ├── ingest/
+│       │   │   ├── video_reader.py     # frame sampling (opencv)
+│       │   │   └── audio_reader.py     # waveform extraction (ffmpeg)
+│       │   ├── features/
+│       │   │   ├── visual_features.py  # frame-diff / histogram distance for cuts
+│       │   │   ├── audio_features.py   # RMS/energy envelope for silence
+│       │   │   └── color_features.py   # dominant-palette extraction for stage ID
+│       │   ├── detectors/
+│       │   │   ├── cut_detector.py     # scene-change detection
+│       │   │   └── silence_detector.py # dead-air detection
+│       │   ├── classification/
+│       │   │   └── stage_classifier.py # k-NN over color_features, built on davinchi.ml
+│       │   └── timeline/
+│       │       ├── segments.py         # merges cuts + silence + stage labels into one timeline
+│       │       └── export.py           # timeline -> intermediate JSON
+│       │
+│       └── resolve/                # DaVinci Resolve API integration — isolated on purpose
+│           ├── client.py           # session/connection handling
+│           └── timeline_builder.py # pushes markers/cuts into a Resolve project
+│
+├── scripts/
+│   └── process_footage.py          # `python -m scripts.process_footage clip.mp4`
+├── data/
+│   └── samples/                    # a couple short dev/test clips
+└── tests/
+    ├── ml/                         # existing tests, e.g. the VDM regression test
+    └── video/
+        ├── test_visual_features.py
+        ├── test_audio_features.py
+        └── test_timeline.py
